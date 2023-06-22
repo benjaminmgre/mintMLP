@@ -13,7 +13,7 @@ def load_data(n_samples):
     data = []
     labels = []
     for i in range(0, n_samples):
-        sample = np.random.randint(1, 10, size=(10, 1))
+        sample = np.random.uniform(-1, 1, (10, 1))
         sum = sample.sum()
         data.append(sample)
         labels.append(sum)
@@ -39,8 +39,7 @@ class SLP2():
         self.b1 = np.random.randn(n_hidden, 1)
         self.b2 = np.random.randn(n_out, 1)
 
-        # Create train and test data
-        self.train_data, self.train_labels = load_data(1000)
+        # Create test data
         self.test_data, self.test_labels = load_data(200)
 
         # Define model hyperparameters
@@ -54,8 +53,12 @@ class SLP2():
     def der_ReLU(self, x):
         return (x > 0) * 1
 
+    def sigmoid(self, x):
+        return
+
+
     # I will use a linear activation function for the output.
-    # The point of writing this out is that it can be replaced
+    # The point of writing this out is that it can be replaced with another activation function
     def linear(self, x):
         return x
 
@@ -66,6 +69,7 @@ class SLP2():
         """
         The forward step. 
         :param x: Input data
+        :param y: Data labels
         :return: 
         """
         self.x = x
@@ -83,7 +87,7 @@ class SLP2():
     def backward(self):
         delta2 = self.error * self.der_linear(self.z2)
         w2_grad = np.matmul(delta2, self.a1.T)
-        b2_grad = self.der_linear(self.a1)
+        b2_grad = delta2 * self.der_linear(self.a1)
 
         delta1 = np.matmul(self.w2.T, delta2) * self.der_ReLU(self.z1)
         w1_grad = np.matmul(delta1, self.x.T)
@@ -98,11 +102,12 @@ class SLP2():
     def train(self):
         for n in range(0, self.epochs):
             loss = 0
-            for x in range(0, len(self.train_data)):
-                self.forward(self.train_data[x], self.train_labels[x])
+            train_data, train_labels = load_data(1000)
+            for x in range(0, len(train_data)):
+                self.forward(train_data[x], train_labels[x])
                 self.backward()
                 loss += np.mean(self.error ** 2) * 0.5
-            print(f'Loss: {loss/len(self.train_data)}')
+            print(f'Loss: {loss/len(train_data)}')
 
 
     def test(self):
@@ -110,6 +115,6 @@ class SLP2():
             self.forward(self.test_data[x], self.test_labels[x])
             print(f'Input: {self.test_data[x]}, Output: {self.a2}, Predicted: {self.test_labels[x]}')
 
-slp = SLP2(12, 10, 1)
+slp = SLP2(20, 10, 1)
 slp.train()
 slp.test()
